@@ -1,2 +1,3 @@
 backend/senhaApi.py
 backend/requirements.txt
+backend/venv/
