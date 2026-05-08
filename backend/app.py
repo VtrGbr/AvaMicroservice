@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, session, redirect, url_for, render_template
+from flask import Flask, request, jsonify, session, redirect, url_for, render_template,send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
 from datetime import date, datetime, timedelta
@@ -8,6 +8,7 @@ import json
 
 from models import db, Usuario, Turma, Crianca, Aula, Frequencia, PlanoAula, Aviso
 from oferta_service import calcular_oferta_mensal, detalhe_oferta_professor, calcular_valor_aula
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__, template_folder='../frontend/templates', static_folder='../frontend/static')
 app.secret_key = senhaApi.chaveAPi
@@ -16,6 +17,16 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 
+# Configuração de upload
+UPLOAD_FOLDER = 'uploads/planos'
+ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Certifique-se de que a pasta existe
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # ─── Decorators de autenticação ───────────────────────────────────────────────
 
@@ -262,23 +273,39 @@ def listar_planos():
         planos = PlanoAula.query.order_by(PlanoAula.criado_em.desc()).all()
     return jsonify([p.to_dict() for p in planos])
 
+# Rota para o Coordenador/Professor baixar/ver o arquivo
+@app.route('/uploads/planos/<filename>')
+@login_required
+def download_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 
 @app.route('/api/planos', methods=['POST'])
 @login_required
 def criar_plano():
-    dados = request.get_json()
-    data_aula = datetime.strptime(dados['data_aula'], '%Y-%m-%d').date()
+    # Quando há arquivos, usamos request.form em vez de request.get_json()
+    dados = request.form 
+    arquivo = request.files.get('arquivo')
+    nome_arquivo = None
+
+    if arquivo and allowed_file(arquivo.filename):
+        filename = secure_filename(f"{datetime.now().timestamp()}_{arquivo.filename}")
+        arquivo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        nome_arquivo = filename
+
     plano = PlanoAula(
         professor_id=session['user_id'],
-        turma_id=dados['turma_id'],
-        data_aula=data_aula,
+        turma_id=int(dados['turma_id']),
+        data_aula=datetime.strptime(dados['data_aula'], '%Y-%m-%d').date(),
         tema=dados['tema'],
         eixo=dados['eixo'],
         objetivos=dados['objetivos'],
         metodologia=dados.get('metodologia', ''),
         materiais=dados.get('materiais', ''),
-        status='enviado'
+        status='enviado',
+        arquivo_anexo=nome_arquivo # Salva o nome do arquivo
     )
+
     db.session.add(plano)
     db.session.commit()
     return jsonify(plano.to_dict()), 201

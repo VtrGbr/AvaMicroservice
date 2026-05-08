@@ -295,6 +295,12 @@
       </div>
     </div>
     <button class="btn btn-verde" onclick="enviarPlano()">📤 Enviar Plano</button>
+    <div class="form-row">
+      <div class="campo">
+        <label>Anexo (PDF, Imagem)</label>
+        <input type="file" id="plano-arquivo">
+      </div>
+    </div>
   </div>
 
   <div class="card">
@@ -515,19 +521,29 @@ async function carregarPlanos() {
 }
 
 async function enviarPlano() {
-  const dados = {
-    turma_id: parseInt(document.getElementById('plano-turma').value),
-    data_aula: document.getElementById('plano-data').value,
-    eixo: document.getElementById('plano-eixo').value,
-    tema: document.getElementById('plano-tema').value,
-    objetivos: document.getElementById('plano-objetivos').value,
-    metodologia: document.getElementById('plano-metodologia').value,
-    materiais: document.getElementById('plano-materiais').value,
-  };
-  if (!dados.tema || !dados.objetivos) { alert('Preencha tema e objetivos.'); return; }
-  await fetch('/api/planos', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(dados) });
-  alert('📤 Plano enviado!');
-  carregarPlanos();
+  const formData = new FormData();
+  formData.append('turma_id', document.getElementById('plano-turma').value);
+  formData.append('data_aula', document.getElementById('plano-data').value);
+  formData.append('eixo', document.getElementById('plano-eixo').value);
+  formData.append('tema', document.getElementById('plano-tema').value);
+  formData.append('objetivos', document.getElementById('plano-objetivos').value);
+  formData.append('metodologia', document.getElementById('plano-metodologia').value);
+  formData.append('materiais', document.getElementById('plano-materiais').value);
+  
+  const arquivoInput = document.getElementById('plano-arquivo');
+  if (arquivoInput.files[0]) {
+    formData.append('arquivo', arquivoInput.files[0]);
+  }
+
+  const res = await fetch('/api/planos', {
+    method: 'POST',
+    body: formData // Não envie headers de Content-Type, o browser fará isso
+  });
+  
+  if(res.ok) {
+    alert('📤 Plano enviado com anexo!');
+    carregarPlanos();
+  }
 }
 
 function abrirResumo(planoId) {

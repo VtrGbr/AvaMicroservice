@@ -169,6 +169,7 @@ class PlanoAula(db.Model):
     status = db.Column(db.String(20), default='enviado')  # enviado, aprovado, revisao
     feedback_coord = db.Column(db.Text, nullable=True)
     criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+    arquivo_anexo = db.Column(db.String(255), nullable = True)
 
     professor = db.relationship('Usuario', backref='planos')
     turma = db.relationship('Turma', backref='planos')
@@ -187,7 +188,8 @@ class PlanoAula(db.Model):
             'resumo_pos_aula': self.resumo_pos_aula,
             'status': self.status,
             'feedback_coord': self.feedback_coord,
-            'criado_em': self.criado_em.isoformat()
+            'criado_em': self.criado_em.isoformat(),
+            'arquivo_anexo':self.arquivo_anexo
         }
 
 

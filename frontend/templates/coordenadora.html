@@ -441,6 +441,12 @@ async function carregarPlanos() {
           <textarea id="feedback-texto-${p.id}" style="width:100%;padding:8px;border:2px solid var(--borda);border-radius:6px;font-family:'Lato',sans-serif;margin-top:8px;" placeholder="Feedback para o professor..."></textarea>
           <button class="btn btn-perigo btn-sm" style="margin-top:6px" onclick="enviarFeedback(${p.id})">Enviar para Revisão</button>
         </div>
+        ${p.arquivo_anexo ? `
+      <div style="margin-top:8px;">
+        <a href="/uploads/planos/${p.arquivo_anexo}" target="_blank" class="btn btn-outline btn-sm">
+          📎 Ver Arquivo Anexo
+        </a>
+      </div>` : ''}
       </div>`).join('') :
     '<div class="msg-vazio">Nenhum plano encontrado.</div>';
 }
