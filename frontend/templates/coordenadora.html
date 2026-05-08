@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projeto Igreja — Coordenadora</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde: #2d6a4f; --verde-claro: #52b788; --verde-bg: #d8f3dc;
+    --dourado: #d4a017; --creme: #fdf8f0; --texto: #1a1a2e;
+    --cinza: #6b7280; --borda: #e5e7eb;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Lato', sans-serif; background: #f3f4f6; color: var(--texto); }
+
+  header {
+    background: #1a1a2e; color: white; padding: 0 24px;
+    height: 64px; display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .header-logo { font-family: 'Playfair Display', serif; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+  .badge-coord { background: var(--dourado); color: #1a1a2e; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+  .btn-sair { background: rgba(255,255,255,0.1); border: none; color: white; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-family: 'Lato', sans-serif; }
+
+  .tabs { background: white; border-bottom: 2px solid var(--borda); display: flex; padding: 0 24px; overflow-x: auto; }
+  .tab { padding: 16px 18px; cursor: pointer; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--cinza); border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; white-space: nowrap; }
+  .tab.ativo { color: #1a1a2e; border-bottom-color: var(--dourado); }
+  .tab:hover { color: #1a1a2e; }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 28px 20px; }
+  .secao { display: none; }
+  .secao.ativo { display: block; }
+
+  .card { background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .card-titulo { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #1a1a2e; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; }
+
+  .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .stat { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); text-align: center; }
+  .stat .valor { font-size: 2.2rem; font-weight: 700; font-family: 'Playfair Display', serif; color: var(--verde); }
+  .stat .label { font-size: 0.78rem; color: var(--cinza); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .form-row.tres { grid-template-columns: 1fr 1fr 1fr; }
+  .form-row.full { grid-template-columns: 1fr; }
+  .campo { display: flex; flex-direction: column; gap: 5px; }
+  .campo label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--cinza); }
+  .campo input, .campo select, .campo textarea { padding: 10px 12px; border: 2px solid var(--borda); border-radius: 8px; font-size: 0.92rem; font-family: 'Lato', sans-serif; transition: border-color 0.2s; }
+  .campo input:focus, .campo select:focus, .campo textarea:focus { outline: none; border-color: var(--verde-claro); }
+  .campo textarea { resize: vertical; min-height: 80px; }
+
+  .btn { padding: 10px 22px; border: none; border-radius: 8px; cursor: pointer; font-family: 'Lato', sans-serif; font-weight: 700; font-size: 0.9rem; transition: all 0.2s; }
+  .btn-escuro { background: #1a1a2e; color: white; }
+  .btn-escuro:hover { background: #2d2d4e; }
+  .btn-verde { background: var(--verde); color: white; }
+  .btn-verde:hover { background: #1f4d38; }
+  .btn-dourado { background: var(--dourado); color: #1a1a2e; }
+  .btn-dourado:hover { background: #b8860f; }
+  .btn-outline { background: transparent; border: 2px solid var(--borda); color: var(--texto); }
+  .btn-outline:hover { border-color: var(--verde); color: var(--verde); }
+  .btn-sm { padding: 5px 12px; font-size: 0.8rem; }
+  .btn-perigo { background: #fee2e2; color: #dc2626; border: none; }
+  .btn-sucesso { background: var(--verde-bg); color: var(--verde); border: none; }
+
+  /* PLANOS */
+  .plano-card { border: 2px solid var(--borda); border-radius: 10px; padding: 16px; margin-bottom: 12px; transition: border-color 0.2s; }
+  .plano-card:hover { border-color: var(--verde-claro); }
+  .plano-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .plano-meta { font-size: 0.8rem; color: var(--cinza); margin-top: 4px; }
+  .plano-acoes { display: flex; gap: 8px; flex-shrink: 0; }
+  .plano-feedback-area { margin-top: 12px; display: none; }
+  .plano-feedback-area.aberto { display: block; }
+
+  .badge { padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+  .badge-enviado { background: #fef3c7; color: #92400e; }
+  .badge-aprovado { background: var(--verde-bg); color: var(--verde); }
+  .badge-revisao { background: #fee2e2; color: #dc2626; }
+
+  /* OFERTA */
+  .oferta-tabela { width: 100%; border-collapse: collapse; }
+  .oferta-tabela th { background: #f3f4f6; padding: 10px 14px; text-align: left; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--cinza); }
+  .oferta-tabela td { padding: 12px 14px; border-bottom: 1px solid var(--borda); }
+  .oferta-tabela tr:hover td { background: #fafafa; }
+  .valor-destaque { font-size: 1.1rem; font-weight: 700; color: var(--verde); }
+  .total-row td { background: var(--verde-bg) !important; font-weight: 700; }
+
+  /* CRIANÇAS */
+  .crianca-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--borda); margin-bottom: 6px; }
+  .crianca-nome { font-weight: 700; }
+  .crianca-info { font-size: 0.8rem; color: var(--cinza); }
+  .badge-promocao { background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; }
+
+  /* TURMAS */
+  .turma-card { border-left: 4px solid var(--verde-claro); padding: 16px; border-radius: 8px; background: #f9fafb; margin-bottom: 12px; }
+  .turma-nome { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--verde); }
+  .turma-info { font-size: 0.85rem; color: var(--cinza); margin-top: 6px; }
+
+  /* AVISOS */
+  .aviso-item { padding: 14px 16px; border-radius: 8px; border-left: 4px solid var(--verde-claro); background: #f9fafb; margin-bottom: 10px; }
+  .aviso-item.urgente { border-left-color: #ef4444; background: #fef2f2; }
+  .aviso-titulo { font-weight: 700; margin-bottom: 4px; }
+  .aviso-data { font-size: 0.78rem; color: var(--cinza); margin-top: 6px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  th { text-align: left; padding: 8px 12px; background: #f3f4f6; color: var(--cinza); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--borda); }
+
+  .msg-vazio { text-align: center; color: var(--cinza); padding: 32px; font-style: italic; }
+  .filtros { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+
+  @media (max-width: 600px) { .form-row, .form-row.tres { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-logo">✝ <span>Projeto Igreja</span></div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span style="font-size:0.9rem;">{{ usuario }}</span>
+    <span class="badge-coord">Coordenadora</span>
+    <button class="btn-sair" onclick="sair()">Sair</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab ativo" onclick="abrirTab('painel')">📊 Painel</div>
+  <div class="tab" onclick="abrirTab('planos')">📋 Planos de Aula</div>
+  <div class="tab" onclick="abrirTab('oferta')">💰 Oferta</div>
+  <div class="tab" onclick="abrirTab('criancas')">👦 Crianças</div>
+  <div class="tab" onclick="abrirTab('turmas')">🏫 Turmas</div>
+  <div class="tab" onclick="abrirTab('avisos')">📢 Avisos</div>
+  <div class="tab" onclick="abrirTab('usuarios')">👤 Usuários</div>
+</div>
+
+<main>
+
+<!-- PAINEL -->
+<div id="tab-painel" class="secao ativo">
+  <div class="grid-4" id="stats-painel"></div>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;" id="painel-cols">
+    <div class="card">
+      <div class="card-titulo">📋 Planos Aguardando Análise</div>
+      <div id="painel-planos-pendentes"></div>
+    </div>
+    <div class="card">
+      <div class="card-titulo">🔔 Últimos Avisos</div>
+      <div id="painel-avisos"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-titulo">👦 Crianças Elegíveis para Promoção</div>
+    <div id="painel-promocoes"></div>
+  </div>
+</div>
+
+<!-- PLANOS DE AULA -->
+<div id="tab-planos" class="secao">
+  <div class="card">
+    <div class="card-titulo">
+      <span>📋 Planos de Aula</span>
+    </div>
+    <div class="filtros">
+      <select id="filtro-status-plano" onchange="carregarPlanos()" style="padding:7px 12px; border:2px solid var(--borda); border-radius:8px; font-family:'Lato',sans-serif;">
+        <option value="">Todos os status</option>
+        <option value="enviado" selected>⏳ Aguardando</option>
+        <option value="aprovado">✅ Aprovados</option>
+        <option value="revisao">⚠️ Para revisão</option>
+      </select>
+    </div>
+    <div id="lista-planos-coord"></div>
+  </div>
+</div>
+
+<!-- OFERTA -->
+<div id="tab-oferta" class="secao">
+  <div class="card">
+    <div class="card-titulo">💰 Cálculo de Oferta por Professor</div>
+    <div class="filtros">
+      <select id="oferta-mes" style="padding:8px 12px; border:2px solid var(--borda); border-radius:8px; font-family:'Lato',sans-serif;">
+        <option value="1">Janeiro</option><option value="2">Fevereiro</option>
+        <option value="3">Março</option><option value="4">Abril</option>
+        <option value="5">Maio</option><option value="6">Junho</option>
+        <option value="7">Julho</option><option value="8">Agosto</option>
+        <option value="9">Setembro</option><option value="10">Outubro</option>
+        <option value="11">Novembro</option><option value="12">Dezembro</option>
+      </select>
+      <select id="oferta-ano" style="padding:8px 12px; border:2px solid var(--borda); border-radius:8px; font-family:'Lato',sans-serif;"></select>
+      <button class="btn btn-dourado" onclick="carregarOferta()">Calcular</button>
+    </div>
+    <div id="resultado-oferta"></div>
+  </div>
+  <div class="card" id="detalhe-oferta-card" style="display:none">
+    <div class="card-titulo" id="detalhe-oferta-titulo">Detalhamento</div>
+    <div id="detalhe-oferta-conteudo"></div>
+  </div>
+</div>
+
+<!-- CRIANÇAS -->
+<div id="tab-criancas" class="secao">
+  <div class="card">
+    <div class="card-titulo">
+      <span>👦 Cadastrar Criança</span>
+    </div>
+    <div class="form-row tres">
+      <div class="campo">
+        <label>Nome</label>
+        <input type="text" id="cri-nome">
+      </div>
+      <div class="campo">
+        <label>Data de Nascimento</label>
+        <input type="date" id="cri-nasc">
+      </div>
+      <div class="campo">
+        <label>Turma</label>
+        <select id="cri-turma"></select>
+      </div>
+    </div>
+    <button class="btn btn-verde" onclick="cadastrarCrianca()">Cadastrar</button>
+  </div>
+  <div class="card">
+    <div class="card-titulo">Lista de Crianças</div>
+    <div class="filtros">
+      <select id="filtro-turma-cri" onchange="carregarCriancas()" style="padding:7px 12px; border:2px solid var(--borda); border-radius:8px; font-family:'Lato',sans-serif;">
+        <option value="">Todas as turmas</option>
+      </select>
+    </div>
+    <div id="lista-criancas"></div>
+  </div>
+</div>
+
+<!-- TURMAS -->
+<div id="tab-turmas" class="secao">
+  <div class="card">
+    <div class="card-titulo">🏫 Turmas</div>
+    <div id="lista-turmas-coord"></div>
+  </div>
+  <div class="card">
+    <div class="card-titulo">Editar / Criar Turma</div>
+    <div class="form-row tres">
+      <div class="campo"><label>Nome</label><input type="text" id="turma-nome" placeholder="Turma 1"></div>
+      <div class="campo"><label>Idade Mín.</label><input type="number" id="turma-imin"></div>
+      <div class="campo"><label>Idade Máx.</label><input type="number" id="turma-imax"></div>
+    </div>
+    <div class="form-row">
+      <div class="campo"><label>Professor Titular</label><select id="turma-prof"></select></div>
+      <div class="campo"><label>Professor de Apoio (opcional)</label>
+        <select id="turma-apoio"><option value="">Nenhum</option></select>
+      </div>
+    </div>
+    <button class="btn btn-verde" onclick="salvarTurma()">Salvar Turma</button>
+  </div>
+</div>
+
+<!-- AVISOS -->
+<div id="tab-avisos" class="secao">
+  <div class="card">
+    <div class="card-titulo">📢 Enviar Aviso</div>
+    <div class="form-row">
+      <div class="campo">
+        <label>Destinatário</label>
+        <select id="aviso-dest">
+          <option value="">Todos os professores</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label>Urgente?</label>
+        <select id="aviso-urgente">
+          <option value="false">Não</option>
+          <option value="true">🚨 Sim, urgente</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row full">
+      <div class="campo"><label>Título</label><input type="text" id="aviso-titulo"></div>
+    </div>
+    <div class="form-row full">
+      <div class="campo"><label>Mensagem</label><textarea id="aviso-mensagem"></textarea></div>
+    </div>
+    <button class="btn btn-escuro" onclick="enviarAviso()">📤 Enviar Aviso</button>
+  </div>
+  <div class="card">
+    <div class="card-titulo">Histórico de Avisos</div>
+    <div id="lista-avisos-coord"></div>
+  </div>
+</div>
+
+<!-- USUÁRIOS -->
+<div id="tab-usuarios" class="secao">
+  <div class="card">
+    <div class="card-titulo">👤 Cadastrar Usuário</div>
+    <div class="form-row tres">
+      <div class="campo"><label>Nome</label><input type="text" id="u-nome"></div>
+      <div class="campo"><label>Email</label><input type="email" id="u-email"></div>
+      <div class="campo"><label>Perfil</label>
+        <select id="u-perfil">
+          <option value="professor">Professor</option>
+          <option value="coordenadora">Coordenadora</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="campo"><label>Senha inicial</label><input type="password" id="u-senha"></div>
+    </div>
+    <button class="btn btn-verde" onclick="cadastrarUsuario()">Cadastrar</button>
+  </div>
+  <div class="card">
+    <div class="card-titulo">Professores Cadastrados</div>
+    <div id="lista-usuarios"></div>
+  </div>
+</div>
+
+</main>
+
+<script>
+let turmas = [];
+let professores = [];
+const MESES = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+async function init() {
+  const ano = new Date().getFullYear();
+  const selAno = document.getElementById('oferta-ano');
+  for (let a = ano; a >= ano - 2; a--) selAno.innerHTML += `<option value="${a}">${a}</option>`;
+  document.getElementById('oferta-mes').value = new Date().getMonth() + 1;
+
+  turmas = await (await fetch('/api/turmas')).json();
+  professores = await (await fetch('/api/professores')).json();
+
+  popularSelectsGlobal();
+  carregarPainel();
+  carregarPlanos();
+  carregarOferta();
+  carregarCriancas();
+  carregarTurmas();
+  carregarAvisos();
+  carregarUsuarios();
+}
+
+function popularSelectsGlobal() {
+  const optsTurma = turmas.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
+  ['cri-turma', 'turma-prof'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = optsTurma;
+  });
+
+  const filtroCri = document.getElementById('filtro-turma-cri');
+  filtroCri.innerHTML = '<option value="">Todas as turmas</option>' + optsTurma;
+
+  const apoio = document.getElementById('turma-apoio');
+  apoio.innerHTML = '<option value="">Nenhum</option>' + professores.map(p => `<option value="${p.id}">${p.nome}</option>`).join('');
+
+  const turmaProfSel = document.getElementById('turma-prof');
+  turmaProfSel.innerHTML = professores.map(p => `<option value="${p.id}">${p.nome}</option>`).join('');
+
+  const avisoDestSel = document.getElementById('aviso-dest');
+  avisoDestSel.innerHTML = '<option value="">Todos</option>' + professores.map(p => `<option value="${p.id}">${p.nome}</option>`).join('');
+}
+
+async function carregarPainel() {
+  const [criancas, planos, avisos, aulas] = await Promise.all([
+    fetch('/api/criancas').then(r=>r.json()),
+    fetch('/api/planos').then(r=>r.json()),
+    fetch('/api/avisos').then(r=>r.json()),
+    fetch('/api/aulas').then(r=>r.json()),
+  ]);
+  const pendentes = planos.filter(p => p.status === 'enviado').length;
+  const promocoes = criancas.filter(c => c.elegivel_promocao);
+
+  document.getElementById('stats-painel').innerHTML = `
+    <div class="stat"><div class="valor">${turmas.length}</div><div class="label">Turmas Ativas</div></div>
+    <div class="stat"><div class="valor">${criancas.length}</div><div class="label">Crianças</div></div>
+    <div class="stat"><div class="valor">${professores.length}</div><div class="label">Professores</div></div>
+    <div class="stat" style="${pendentes>0?'border:2px solid #fbbf24;':''}">
+      <div class="valor" style="${pendentes>0?'color:#d97706;':''}">${pendentes}</div>
+      <div class="label">Planos Pendentes</div>
+    </div>`;
+
+  // Planos pendentes
+  const pp = planos.filter(p => p.status === 'enviado').slice(0, 4);
+  document.getElementById('painel-planos-pendentes').innerHTML = pp.length ?
+    pp.map(p => `<div style="padding:10px 0; border-bottom:1px solid var(--borda); display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div style="font-weight:700">${p.tema}</div>
+        <div style="font-size:0.78rem;color:var(--cinza)">${p.professor.nome} · ${p.turma.nome}</div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-sucesso btn-sm" onclick="avaliarPlano(${p.id},'aprovado')">✅</button>
+        <button class="btn btn-perigo btn-sm" onclick="avaliarPlano(${p.id},'revisao')">⚠️</button>
+      </div>
+    </div>`).join('') :
+    '<div class="msg-vazio">Nenhum plano aguardando.</div>';
+
+  // Avisos
+  document.getElementById('painel-avisos').innerHTML = avisos.slice(0,3).map(a => `
+    <div class="aviso-item ${a.urgente?'urgente':''}">
+      <div class="aviso-titulo">${a.titulo}</div>
+      <div class="aviso-data">${new Date(a.criado_em).toLocaleDateString('pt-BR')}</div>
+    </div>`).join('') || '<div class="msg-vazio">Nenhum aviso.</div>';
+
+  // Promoções
+  document.getElementById('painel-promocoes').innerHTML = promocoes.length ?
+    promocoes.map(c => `
+      <div class="crianca-item">
+        <div><div class="crianca-nome">${c.nome}</div>
+        <div class="crianca-info">${c.turma_nome} · ${c.idade} anos</div></div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="badge-promocao">Elegível para promoção</span>
+          <button class="btn btn-verde btn-sm" onclick="promoverCrianca(${c.id})">Promover</button>
+        </div>
+      </div>`).join('') :
+    '<div class="msg-vazio">Nenhuma criança elegível no momento.</div>';
+}
+
+async function carregarPlanos() {
+  const status = document.getElementById('filtro-status-plano').value;
+  let url = '/api/planos';
+  const planos = await (await fetch(url)).json();
+  const filtrados = status ? planos.filter(p => p.status === status) : planos;
+  const badgeMap = { enviado: 'badge-enviado', aprovado: 'badge-aprovado', revisao: 'badge-revisao' };
+  const labelMap = { enviado: '⏳ Aguardando', aprovado: '✅ Aprovado', revisao: '⚠️ Revisão' };
+
+  document.getElementById('lista-planos-coord').innerHTML = filtrados.length ?
+    filtrados.map(p => `
+      <div class="plano-card">
+        <div class="plano-header">
+          <div>
+            <div style="font-weight:700;font-size:0.98rem">${p.tema}</div>
+            <div class="plano-meta">${p.professor.nome} · ${p.turma.nome} · ${new Date(p.data_aula+'T12:00').toLocaleDateString('pt-BR')} · <em>${p.eixo}</em></div>
+            <div class="plano-meta" style="margin-top:4px">${p.objetivos?.substring(0,120)}${p.objetivos?.length>120?'...':''}</div>
+            ${p.resumo_pos_aula ? `<div style="font-size:0.8rem;color:var(--verde);margin-top:4px">📝 Resumo: ${p.resumo_pos_aula.substring(0,80)}...</div>` : ''}
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0">
+            <span class="badge ${badgeMap[p.status]}">${labelMap[p.status]}</span>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-sucesso btn-sm" onclick="avaliarPlano(${p.id},'aprovado')">✅ Aprovar</button>
+              <button class="btn btn-perigo btn-sm" onclick="abrirFeedback(${p.id})">⚠️ Revisão</button>
+            </div>
+          </div>
+        </div>
+        ${p.feedback_coord ? `<div style="font-size:0.82rem;color:#dc2626;margin-top:8px;font-style:italic">💬 Feedback: ${p.feedback_coord}</div>` : ''}
+        <div class="plano-feedback-area" id="feedback-area-${p.id}">
+          <textarea id="feedback-texto-${p.id}" style="width:100%;padding:8px;border:2px solid var(--borda);border-radius:6px;font-family:'Lato',sans-serif;margin-top:8px;" placeholder="Feedback para o professor..."></textarea>
+          <button class="btn btn-perigo btn-sm" style="margin-top:6px" onclick="enviarFeedback(${p.id})">Enviar para Revisão</button>
+        </div>
+      </div>`).join('') :
+    '<div class="msg-vazio">Nenhum plano encontrado.</div>';
+}
+
+function abrirFeedback(planoId) {
+  const area = document.getElementById(`feedback-area-${planoId}`);
+  area.classList.toggle('aberto');
+}
+
+async function avaliarPlano(planoId, status) {
+  await fetch(`/api/planos/${planoId}`, {
+    method: 'PUT', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ status })
+  });
+  carregarPlanos();
+  carregarPainel();
+}
+
+async function enviarFeedback(planoId) {
+  const txt = document.getElementById(`feedback-texto-${planoId}`).value;
+  if (!txt) { alert('Escreva um feedback.'); return; }
+  await fetch(`/api/planos/${planoId}`, {
+    method: 'PUT', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ status: 'revisao', feedback_coord: txt })
+  });
+  carregarPlanos();
+}
+
+async function carregarOferta() {
+  const mes = document.getElementById('oferta-mes').value;
+  const ano = document.getElementById('oferta-ano').value;
+  const data = await (await fetch(`/api/oferta?mes=${mes}&ano=${ano}`)).json();
+  const total = data.reduce((s, p) => s + p.valor_total, 0);
+
+  document.getElementById('resultado-oferta').innerHTML = data.length ?
+    `<table class="oferta-tabela">
+      <thead><tr><th>Professor</th><th>Aulas</th><th>Valor a Receber</th><th></th></tr></thead>
+      <tbody>
+        ${data.map(p => `
+          <tr>
+            <td><strong>${p.professor_nome}</strong></td>
+            <td>${p.total_aulas}</td>
+            <td class="valor-destaque">R$ ${p.valor_total.toFixed(2).replace('.',',')}</td>
+            <td><button class="btn btn-outline btn-sm" onclick="verDetalheOferta(${p.professor_id},'${p.professor_nome}')">Ver detalhe</button></td>
+          </tr>`).join('')}
+        <tr class="total-row">
+          <td>Total do mês</td>
+          <td>—</td>
+          <td class="valor-destaque">R$ ${total.toFixed(2).replace('.',',')}</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>` :
+    '<div class="msg-vazio">Nenhum dado no período.</div>';
+}
+
+async function verDetalheOferta(profId, profNome) {
+  const mes = document.getElementById('oferta-mes').value;
+  const ano = document.getElementById('oferta-ano').value;
+  const data = await (await fetch(`/api/oferta/${profId}?mes=${mes}&ano=${ano}`)).json();
+  document.getElementById('detalhe-oferta-titulo').textContent = `Detalhe — ${profNome} · ${MESES[parseInt(mes)]}/${ano}`;
+  document.getElementById('detalhe-oferta-conteudo').innerHTML = data.detalhes.length ?
+    `<table>
+      <thead><tr><th>Data</th><th>Turma</th><th>Horário</th><th>Presentes</th><th>Valor Bruto</th><th>Recebe</th><th>Obs.</th></tr></thead>
+      <tbody>${data.detalhes.map(d => `
+        <tr>
+          <td>${new Date(d.data+'T12:00').toLocaleDateString('pt-BR')}</td>
+          <td>${d.turma}</td>
+          <td>${d.horario}</td>
+          <td>${d.presentes} (R$ ${(d.presentes*0.3).toFixed(2)})</td>
+          <td>R$ ${d.valor_bruto_aula.toFixed(2).replace('.',',')}</td>
+          <td><strong>R$ ${d.valor_recebido.toFixed(2).replace('.',',')}</strong></td>
+          <td style="font-size:0.75rem;color:${d.titular_faltou?'#dc2626':'var(--cinza)'}">${d.titular_faltou?'Substituto':'—'}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+    <div style="margin-top:14px;padding:12px 16px;background:var(--verde-bg);border-radius:8px;font-weight:700;color:var(--verde)">
+      Total: R$ ${data.valor_total.toFixed(2).replace('.',',')} em ${data.total_aulas} aulas
+    </div>` :
+    '<div class="msg-vazio">Nenhuma aula.</div>';
+  document.getElementById('detalhe-oferta-card').style.display = 'block';
+  document.getElementById('detalhe-oferta-card').scrollIntoView({ behavior: 'smooth' });
+}
+
+async function carregarCriancas() {
+  const turmaId = document.getElementById('filtro-turma-cri').value;
+  const url = turmaId ? `/api/criancas?turma_id=${turmaId}` : '/api/criancas';
+  const criancas = await (await fetch(url)).json();
+  document.getElementById('lista-criancas').innerHTML = criancas.length ?
+    criancas.map(c => `
+      <div class="crianca-item">
+        <div>
+          <div class="crianca-nome">${c.nome}</div>
+          <div class="crianca-info">${c.turma_nome} · ${c.idade} anos · nasc. ${new Date(c.data_nascimento+'T12:00').toLocaleDateString('pt-BR')}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          ${c.elegivel_promocao ? `<span class="badge-promocao">Para promover</span><button class="btn btn-verde btn-sm" onclick="promoverCrianca(${c.id})">Promover</button>` : ''}
+        </div>
+      </div>`).join('') :
+    '<div class="msg-vazio">Nenhuma criança encontrada.</div>';
+}
+
+async function cadastrarCrianca() {
+  const dados = {
+    nome: document.getElementById('cri-nome').value,
+    data_nascimento: document.getElementById('cri-nasc').value,
+    turma_id: parseInt(document.getElementById('cri-turma').value)
+  };
+  if (!dados.nome || !dados.data_nascimento) { alert('Preencha todos os campos.'); return; }
+  await fetch('/api/criancas', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(dados) });
+  alert('Criança cadastrada!');
+  carregarCriancas();
+  carregarPainel();
+}
+
+async function promoverCrianca(id) {
+  const res = await fetch(`/api/criancas/${id}/promover`, { method: 'POST' });
+  const data = await res.json();
+  if (res.ok) { alert(`✅ Promovida para ${data.nova_turma}`); carregarCriancas(); carregarPainel(); }
+  else alert(data.erro);
+}
+
+async function carregarTurmas() {
+  document.getElementById('lista-turmas-coord').innerHTML = turmas.map(t => `
+    <div class="turma-card">
+      <div class="turma-nome">${t.nome} <span style="font-size:0.8rem;color:var(--cinza);">(${t.idade_min}–${t.idade_max} anos)</span></div>
+      <div class="turma-info">
+        👨‍🏫 Titular: ${t.professor?.nome || '—'} 
+        ${t.professor_apoio ? ` · 🤝 Apoio: ${t.professor_apoio.nome}` : ''}
+        · 👦 ${t.total_criancas} crianças
+      </div>
+    </div>`).join('');
+}
+
+async function salvarTurma() {
+  const dados = {
+    nome: document.getElementById('turma-nome').value,
+    idade_min: parseInt(document.getElementById('turma-imin').value),
+    idade_max: parseInt(document.getElementById('turma-imax').value),
+    professor_id: parseInt(document.getElementById('turma-prof').value),
+    professor_apoio_id: document.getElementById('turma-apoio').value || null
+  };
+  await fetch('/api/turmas', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(dados) });
+  alert('Turma salva!');
+  turmas = await (await fetch('/api/turmas')).json();
+  carregarTurmas();
+}
+
+async function carregarAvisos() {
+  const avisos = await (await fetch('/api/avisos')).json();
+  document.getElementById('lista-avisos-coord').innerHTML = avisos.length ?
+    avisos.map(a => `
+      <div class="aviso-item ${a.urgente?'urgente':''}">
+        <div class="aviso-titulo">${a.urgente?'🚨 ':'📢 '}${a.titulo}</div>
+        <div>${a.mensagem}</div>
+        <div class="aviso-data">${new Date(a.criado_em).toLocaleDateString('pt-BR')} · Para: ${a.destinatario?.nome||'Todos'}</div>
+      </div>`).join('') :
+    '<div class="msg-vazio">Nenhum aviso.</div>';
+}
+
+async function enviarAviso() {
+  const dados = {
+    titulo: document.getElementById('aviso-titulo').value,
+    mensagem: document.getElementById('aviso-mensagem').value,
+    destinatario_id: document.getElementById('aviso-dest').value || null,
+    urgente: document.getElementById('aviso-urgente').value === 'true'
+  };
+  if (!dados.titulo || !dados.mensagem) { alert('Preencha título e mensagem.'); return; }
+  await fetch('/api/avisos', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(dados) });
+  alert('📤 Aviso enviado!');
+  document.getElementById('aviso-titulo').value = '';
+  document.getElementById('aviso-mensagem').value = '';
+  carregarAvisos();
+  carregarPainel();
+}
+
+async function carregarUsuarios() {
+  const usuarios = await (await fetch('/api/professores')).json();
+  document.getElementById('lista-usuarios').innerHTML = `
+    <table>
+      <thead><tr><th>Nome</th><th>Email</th><th>Perfil</th></tr></thead>
+      <tbody>${usuarios.map(u => `
+        <tr><td>${u.nome}</td><td>${u.email}</td><td><span class="badge badge-aprovado">${u.perfil}</span></td></tr>
+      `).join('')}</tbody>
+    </table>`;
+}
+
+async function cadastrarUsuario() {
+  const dados = {
+    nome: document.getElementById('u-nome').value,
+    email: document.getElementById('u-email').value,
+    perfil: document.getElementById('u-perfil').value,
+    senha: document.getElementById('u-senha').value,
+  };
+  const res = await fetch('/api/usuarios', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(dados) });
+  const data = await res.json();
+  if (res.ok) { alert('Usuário cadastrado!'); carregarUsuarios(); }
+  else alert(data.erro);
+}
+
+function abrirTab(nome) {
+  document.querySelectorAll('.secao').forEach(s => s.classList.remove('ativo'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('ativo'));
+  document.getElementById(`tab-${nome}`).classList.add('ativo');
+  event.target.classList.add('ativo');
+}
+
+async function sair() {
+  await fetch('/api/auth/logout', { method: 'POST' });
+  window.location.href = '/login';
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projeto Igreja — Entrar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde: #2d6a4f;
+    --verde-claro: #52b788;
+    --dourado: #d4a017;
+    --creme: #fdf8f0;
+    --texto: #1a1a2e;
+    --cinza: #6b7280;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--verde);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  body::before {
+    content: '✝';
+    position: absolute;
+    font-size: 40vw;
+    color: rgba(255,255,255,0.04);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    font-family: serif;
+  }
+
+  .card {
+    background: var(--creme);
+    border-radius: 20px;
+    padding: 52px 48px;
+    width: 420px;
+    max-width: 95vw;
+    box-shadow: 0 32px 64px rgba(0,0,0,0.3);
+    animation: surgir 0.5s ease forwards;
+  }
+
+  @keyframes surgir {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .logo {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .logo-icone {
+    width: 64px; height: 64px;
+    background: var(--verde);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin-bottom: 12px;
+  }
+
+  .logo h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.7rem;
+    color: var(--verde);
+    line-height: 1.2;
+  }
+
+  .logo p {
+    color: var(--cinza);
+    font-size: 0.85rem;
+    margin-top: 4px;
+    font-weight: 300;
+  }
+
+  .campo {
+    margin-bottom: 20px;
+  }
+
+  .campo label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--cinza);
+    margin-bottom: 6px;
+  }
+
+  .campo input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-family: 'Lato', sans-serif;
+    transition: border-color 0.2s;
+    background: white;
+  }
+
+  .campo input:focus {
+    outline: none;
+    border-color: var(--verde-claro);
+  }
+
+  .btn-entrar {
+    width: 100%;
+    padding: 14px;
+    background: var(--verde);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.2s, transform 0.1s;
+    letter-spacing: 0.05em;
+  }
+
+  .btn-entrar:hover { background: #1f4d38; }
+  .btn-entrar:active { transform: scale(0.98); }
+
+  .erro {
+    background: #fee2e2;
+    color: #dc2626;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  .rodape {
+    text-align: center;
+    margin-top: 28px;
+    font-size: 0.78rem;
+    color: var(--cinza);
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="logo-icone">✝</div>
+    <h1>Projeto Igreja</h1>
+    <p>Sistema de Gestão de Turmas</p>
+  </div>
+
+  <div class="erro" id="erro">Email ou senha inválidos.</div>
+
+  <div class="campo">
+    <label>Email</label>
+    <input type="email" id="email" placeholder="seu@email.com" autofocus>
+  </div>
+
+  <div class="campo">
+    <label>Senha</label>
+    <input type="password" id="senha" placeholder="••••••••"
+           onkeydown="if(event.key==='Enter') entrar()">
+  </div>
+
+  <button class="btn-entrar" onclick="entrar()">Entrar</button>
+
+  <div class="rodape">
+    Acesso restrito · Projeto Social da Igreja
+  </div>
+</div>
+
+<script>
+async function entrar() {
+  const email = document.getElementById('email').value;
+  const senha = document.getElementById('senha').value;
+  const erro = document.getElementById('erro');
+  erro.style.display = 'none';
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, senha })
+    });
+    if (res.ok) {
+      window.location.href = '/dashboard';
+    } else {
+      erro.style.display = 'block';
+    }
+  } catch (e) {
+    erro.textContent = 'Erro de conexão.';
+    erro.style.display = 'block';
+  }
+}
+</script>
+</body>
+</html>

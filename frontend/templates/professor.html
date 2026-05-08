@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projeto Igreja — Professor</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde: #2d6a4f;
+    --verde-claro: #52b788;
+    --verde-bg: #d8f3dc;
+    --dourado: #d4a017;
+    --creme: #fdf8f0;
+    --texto: #1a1a2e;
+    --cinza: #6b7280;
+    --borda: #e5e7eb;
+    --branco: #ffffff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Lato', sans-serif; background: #f3f4f6; color: var(--texto); }
+
+  /* HEADER */
+  header {
+    background: var(--verde);
+    color: white;
+    padding: 0 24px;
+    height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .header-logo { font-family: 'Playfair Display', serif; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+  .header-usuario { display: flex; align-items: center; gap: 12px; font-size: 0.9rem; }
+  .badge-perfil { background: var(--verde-claro); padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+  .btn-sair { background: rgba(255,255,255,0.15); border: none; color: white; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-family: 'Lato', sans-serif; }
+  .btn-sair:hover { background: rgba(255,255,255,0.25); }
+
+  /* TABS */
+  .tabs { background: white; border-bottom: 2px solid var(--borda); display: flex; gap: 0; padding: 0 24px; }
+  .tab {
+    padding: 16px 20px; cursor: pointer; font-weight: 700; font-size: 0.88rem;
+    text-transform: uppercase; letter-spacing: 0.05em; color: var(--cinza);
+    border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s;
+  }
+  .tab.ativo { color: var(--verde); border-bottom-color: var(--verde); }
+  .tab:hover { color: var(--verde); }
+
+  /* CONTEÚDO */
+  main { max-width: 960px; margin: 0 auto; padding: 28px 20px; }
+  .secao { display: none; }
+  .secao.ativo { display: block; }
+
+  /* CARDS */
+  .card {
+    background: white; border-radius: 12px;
+    padding: 24px; margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .card-titulo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem; color: var(--verde);
+    margin-bottom: 18px; display: flex; align-items: center; gap: 8px;
+  }
+
+  /* GRID RESUMO */
+  .grid-resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 20px; }
+  .resumo-item {
+    background: var(--verde-bg); border-radius: 10px;
+    padding: 16px; text-align: center;
+  }
+  .resumo-item .valor { font-size: 1.8rem; font-weight: 700; color: var(--verde); }
+  .resumo-item .label { font-size: 0.78rem; color: var(--cinza); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* FORM */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .form-row.full { grid-template-columns: 1fr; }
+  .form-row.tres { grid-template-columns: 1fr 1fr 1fr; }
+  .campo { display: flex; flex-direction: column; gap: 5px; }
+  .campo label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--cinza); }
+  .campo input, .campo select, .campo textarea {
+    padding: 10px 12px; border: 2px solid var(--borda); border-radius: 8px;
+    font-size: 0.92rem; font-family: 'Lato', sans-serif;
+    transition: border-color 0.2s;
+  }
+  .campo input:focus, .campo select:focus, .campo textarea:focus {
+    outline: none; border-color: var(--verde-claro);
+  }
+  .campo textarea { resize: vertical; min-height: 80px; }
+
+  /* BOTÕES */
+  .btn { padding: 10px 22px; border: none; border-radius: 8px; cursor: pointer; font-family: 'Lato', sans-serif; font-weight: 700; font-size: 0.9rem; transition: all 0.2s; }
+  .btn-verde { background: var(--verde); color: white; }
+  .btn-verde:hover { background: #1f4d38; }
+  .btn-outline { background: transparent; border: 2px solid var(--verde); color: var(--verde); }
+  .btn-outline:hover { background: var(--verde-bg); }
+  .btn-sm { padding: 6px 14px; font-size: 0.82rem; }
+
+  /* FREQUÊNCIA */
+  .lista-frequencia { display: flex; flex-direction: column; gap: 8px; }
+  .freq-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; background: #f9fafb; border-radius: 8px;
+    border: 2px solid transparent; transition: all 0.15s;
+  }
+  .freq-item.presente { background: var(--verde-bg); border-color: var(--verde-claro); }
+  .freq-item .nome-crianca { font-weight: 700; font-size: 0.95rem; }
+  .toggle-presente {
+    width: 44px; height: 24px; background: #d1d5db; border-radius: 12px;
+    position: relative; cursor: pointer; transition: background 0.2s;
+    border: none;
+  }
+  .toggle-presente.on { background: var(--verde); }
+  .toggle-presente::after {
+    content: ''; position: absolute; width: 18px; height: 18px;
+    background: white; border-radius: 50%; top: 3px; left: 3px;
+    transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .toggle-presente.on::after { transform: translateX(20px); }
+
+  /* AVISOS */
+  .aviso-item {
+    padding: 14px 16px; border-radius: 8px; border-left: 4px solid var(--verde-claro);
+    background: #f9fafb; margin-bottom: 10px;
+  }
+  .aviso-item.urgente { border-left-color: #ef4444; background: #fef2f2; }
+  .aviso-titulo { font-weight: 700; margin-bottom: 4px; }
+  .aviso-data { font-size: 0.78rem; color: var(--cinza); margin-top: 6px; }
+
+  /* STATUS BADGES */
+  .badge { padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+  .badge-enviado { background: #fef3c7; color: #92400e; }
+  .badge-aprovado { background: var(--verde-bg); color: var(--verde); }
+  .badge-revisao { background: #fee2e2; color: #dc2626; }
+
+  /* PLANOS LIST */
+  .plano-item {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 14px 16px; background: #f9fafb; border-radius: 8px; margin-bottom: 8px;
+    gap: 12px;
+  }
+  .plano-info .plano-tema { font-weight: 700; font-size: 0.95rem; }
+  .plano-info .plano-meta { font-size: 0.8rem; color: var(--cinza); margin-top: 3px; }
+  .plano-info .plano-feedback { font-size: 0.82rem; color: #dc2626; margin-top: 6px; font-style: italic; }
+
+  /* OFERTA */
+  .oferta-destaque {
+    text-align: center; padding: 28px;
+    background: linear-gradient(135deg, var(--verde) 0%, var(--verde-claro) 100%);
+    border-radius: 12px; color: white; margin-bottom: 20px;
+  }
+  .oferta-destaque .valor { font-size: 3rem; font-weight: 700; font-family: 'Playfair Display', serif; }
+  .oferta-destaque .mes { font-size: 0.9rem; opacity: 0.85; margin-top: 4px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  th { text-align: left; padding: 8px 12px; background: #f3f4f6; color: var(--cinza); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--borda); }
+
+  .msg-vazio { text-align: center; color: var(--cinza); padding: 32px; font-style: italic; }
+
+  @media (max-width: 600px) {
+    .form-row { grid-template-columns: 1fr; }
+    .form-row.tres { grid-template-columns: 1fr 1fr; }
+    .tabs { gap: 0; overflow-x: auto; }
+    .tab { white-space: nowrap; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-logo">✝ <span>Projeto Igreja</span></div>
+  <div class="header-usuario">
+    <span>{{ usuario }}</span>
+    <span class="badge-perfil">Professor</span>
+    <button class="btn-sair" onclick="sair()">Sair</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab ativo" onclick="abrirTab('inicio')">🏠 Início</div>
+  <div class="tab" onclick="abrirTab('frequencia')">✅ Frequência</div>
+  <div class="tab" onclick="abrirTab('planos')">📋 Planos de Aula</div>
+  <div class="tab" onclick="abrirTab('minha-oferta')">💰 Minha Oferta</div>
+  <div class="tab" onclick="abrirTab('avisos')">🔔 Avisos</div>
+</div>
+
+<main>
+
+<!-- INÍCIO -->
+<div id="tab-inicio" class="secao ativo">
+  <div class="grid-resumo" id="resumo-inicio"></div>
+  <div class="card">
+    <div class="card-titulo">📅 Avisos Recentes</div>
+    <div id="avisos-recentes-home"></div>
+  </div>
+</div>
+
+<!-- FREQUÊNCIA -->
+<div id="tab-frequencia" class="secao">
+  <div class="card">
+    <div class="card-titulo">✅ Registrar Frequência</div>
+
+    <div class="form-row tres">
+      <div class="campo">
+        <label>Turma</label>
+        <select id="freq-turma"></select>
+      </div>
+      <div class="campo">
+        <label>Data da Aula</label>
+        <input type="date" id="freq-data">
+      </div>
+      <div class="campo">
+        <label>Horário</label>
+        <select id="freq-horario">
+          <option value="manha">Manhã</option>
+          <option value="tarde">Tarde</option>
+          <option value="noite">Noite</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="campo">
+        <label>Titular faltou?</label>
+        <select id="freq-titular-faltou" onchange="toggleSubstituto()">
+          <option value="false">Não — Titular presente</option>
+          <option value="true">Sim — Faltou</option>
+        </select>
+      </div>
+      <div class="campo" id="campo-substituto" style="display:none">
+        <label>Quem assumiu a turma?</label>
+        <select id="freq-substituto">
+          <option value="">Selecione...</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn btn-verde" onclick="carregarListaFrequencia()">Carregar Crianças</button>
+  </div>
+
+  <div class="card" id="card-frequencia" style="display:none">
+    <div class="card-titulo" id="freq-card-titulo">Lista de Presença</div>
+    <div class="lista-frequencia" id="lista-freq"></div>
+    <div style="margin-top:20px; display:flex; gap:12px; align-items:center;">
+      <button class="btn btn-verde" onclick="salvarFrequencia()">💾 Salvar Frequência</button>
+      <span id="freq-contador" style="color:var(--verde); font-weight:700;"></span>
+    </div>
+  </div>
+</div>
+
+<!-- PLANOS DE AULA -->
+<div id="tab-planos" class="secao">
+  <div class="card">
+    <div class="card-titulo">📝 Novo Plano de Aula</div>
+    <div class="form-row tres">
+      <div class="campo">
+        <label>Turma</label>
+        <select id="plano-turma"></select>
+      </div>
+      <div class="campo">
+        <label>Data da Aula</label>
+        <input type="date" id="plano-data">
+      </div>
+      <div class="campo">
+        <label>Eixo</label>
+        <select id="plano-eixo">
+          <option value="espiritual">🙏 Espiritual</option>
+          <option value="socioemocional">❤️ Socioemocional</option>
+          <option value="fisico">🏃 Físico</option>
+          <option value="intelectual">📚 Intelectual</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="campo">
+        <label>Tema</label>
+        <input type="text" id="plano-tema" placeholder="Ex: A Parábola do Filho Pródigo">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="campo">
+        <label>Objetivos</label>
+        <textarea id="plano-objetivos" placeholder="O que as crianças irão aprender..."></textarea>
+      </div>
+      <div class="campo">
+        <label>Metodologia</label>
+        <textarea id="plano-metodologia" placeholder="Como a aula será conduzida..."></textarea>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="campo">
+        <label>Materiais necessários</label>
+        <input type="text" id="plano-materiais" placeholder="Bíblia, cartolina, canetão...">
+      </div>
+    </div>
+    <button class="btn btn-verde" onclick="enviarPlano()">📤 Enviar Plano</button>
+  </div>
+
+  <div class="card">
+    <div class="card-titulo">📋 Meus Planos</div>
+    <div id="lista-planos"><div class="msg-vazio">Carregando...</div></div>
+  </div>
+
+  <!-- Modal resumo pós-aula -->
+  <div id="modal-resumo" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; display:none; align-items:center; justify-content:center;">
+    <div style="background:white; border-radius:12px; padding:28px; width:500px; max-width:95vw;">
+      <h3 style="font-family:'Playfair Display',serif; color:var(--verde); margin-bottom:16px;">📝 Resumo Pós-Aula</h3>
+      <input type="hidden" id="resumo-plano-id">
+      <div class="campo" style="margin-bottom:16px;">
+        <label>Como foi a aula?</label>
+        <textarea id="resumo-texto" style="min-height:120px;" placeholder="Descreva como foi a aula, pontos de destaque, como as crianças reagiram..."></textarea>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-verde" onclick="salvarResumo()">Salvar</button>
+        <button class="btn btn-outline" onclick="document.getElementById('modal-resumo').style.display='none'">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MINHA OFERTA -->
+<div id="tab-minha-oferta" class="secao">
+  <div style="display:flex; gap:12px; margin-bottom:20px; align-items:center;">
+    <select id="oferta-mes" style="padding:8px 12px; border:2px solid var(--borda); border-radius:8px; font-family:'Lato',sans-serif;">
+      <option value="1">Janeiro</option><option value="2">Fevereiro</option>
+      <option value="3">Março</option><option value="4">Abril</option>
+      <option value="5">Maio</option><option value="6">Junho</option>
+      <option value="7">Julho</option><option value="8">Agosto</option>
+      <option value="9">Setembro</option><option value="10">Outubro</option>
+      <option value="11">Novembro</option><option value="12">Dezembro</option>
+    </select>
+    <select id="oferta-ano" style="padding:8px 12px; border:2px solid var(--borda); border-radius:8px; font-family:'Lato',sans-serif;"></select>
+    <button class="btn btn-verde btn-sm" onclick="carregarMinhaOferta()">Ver</button>
+  </div>
+  <div id="minha-oferta-conteudo"></div>
+</div>
+
+<!-- AVISOS -->
+<div id="tab-avisos" class="secao">
+  <div class="card">
+    <div class="card-titulo">🔔 Avisos</div>
+    <div id="lista-avisos-prof"><div class="msg-vazio">Carregando...</div></div>
+  </div>
+</div>
+
+</main>
+
+<script>
+let turmasProf = [];
+let todosProfs = [];
+let aulaAtualId = null;
+let meuId = null;
+
+const MESES = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+async function init() {
+  const me = await (await fetch('/api/auth/me')).json();
+  meuId = me.id;
+  document.getElementById('freq-data').value = new Date().toISOString().split('T')[0];
+  document.getElementById('plano-data').value = new Date().toISOString().split('T')[0];
+
+  const ano = new Date().getFullYear();
+  const selAno = document.getElementById('oferta-ano');
+  for (let a = ano; a >= ano - 2; a--) {
+    selAno.innerHTML += `<option value="${a}">${a}</option>`;
+  }
+  document.getElementById('oferta-mes').value = new Date().getMonth() + 1;
+
+  turmasProf = await (await fetch('/api/turmas')).json();
+  todosProfs = await (await fetch('/api/professores')).json();
+
+  popularSelects();
+  carregarResumoInicio();
+  carregarAvisosHome();
+  carregarPlanos();
+  carregarAvisos();
+  carregarMinhaOferta();
+}
+
+function popularSelects() {
+  const opts = turmasProf.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
+  document.getElementById('freq-turma').innerHTML = opts;
+  document.getElementById('plano-turma').innerHTML = opts;
+
+  const subOpts = todosProfs.map(p => `<option value="${p.id}">${p.nome}</option>`).join('');
+  document.getElementById('freq-substituto').innerHTML = '<option value="">Selecione...</option>' + subOpts;
+}
+
+function toggleSubstituto() {
+  const faltou = document.getElementById('freq-titular-faltou').value === 'true';
+  document.getElementById('campo-substituto').style.display = faltou ? 'flex' : 'none';
+}
+
+async function carregarResumoInicio() {
+  const aulas = await (await fetch('/api/aulas')).json();
+  const planos = await (await fetch('/api/planos')).json();
+  const pendentes = planos.filter(p => p.status === 'revisao').length;
+  const html = `
+    <div class="resumo-item"><div class="valor">${turmasProf.length}</div><div class="label">Minhas Turmas</div></div>
+    <div class="resumo-item"><div class="valor">${aulas.length}</div><div class="label">Aulas Registradas</div></div>
+    <div class="resumo-item"><div class="valor">${planos.length}</div><div class="label">Planos Enviados</div></div>
+    <div class="resumo-item" style="${pendentes>0?'background:#fee2e2;':''}">
+      <div class="valor" style="${pendentes>0?'color:#dc2626;':''}">${pendentes}</div>
+      <div class="label">Para Revisar</div>
+    </div>`;
+  document.getElementById('resumo-inicio').innerHTML = html;
+}
+
+async function carregarAvisosHome() {
+  const avisos = await (await fetch('/api/avisos')).json();
+  const recentes = avisos.slice(0, 3);
+  if (!recentes.length) {
+    document.getElementById('avisos-recentes-home').innerHTML = '<div class="msg-vazio">Nenhum aviso no momento.</div>';
+    return;
+  }
+  document.getElementById('avisos-recentes-home').innerHTML = recentes.map(a => `
+    <div class="aviso-item ${a.urgente ? 'urgente' : ''}">
+      <div class="aviso-titulo">${a.urgente ? '🚨 ' : ''}${a.titulo}</div>
+      <div>${a.mensagem}</div>
+      <div class="aviso-data">${new Date(a.criado_em).toLocaleDateString('pt-BR')} · ${a.autor.nome}</div>
+    </div>`).join('');
+}
+
+async function carregarListaFrequencia() {
+  const turmaId = document.getElementById('freq-turma').value;
+  const data = document.getElementById('freq-data').value;
+  const horario = document.getElementById('freq-horario').value;
+  const titularFaltou = document.getElementById('freq-titular-faltou').value === 'true';
+  const substitutoId = document.getElementById('freq-substituto').value || null;
+
+  const turma = turmasProf.find(t => t.id == turmaId);
+
+  // Cria a aula
+  const res = await fetch('/api/aulas', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      turma_id: parseInt(turmaId),
+      data, horario,
+      professor_responsavel_id: meuId,
+      professor_apoio_presente_id: turma?.professor_apoio?.id || null,
+      substituto_id: substitutoId ? parseInt(substitutoId) : null,
+      titular_faltou: titularFaltou
+    })
+  });
+  const aula = await res.json();
+  aulaAtualId = aula.id;
+
+  // Carrega frequência
+  const freq = await (await fetch(`/api/aulas/${aula.id}/frequencia`)).json();
+  document.getElementById('freq-card-titulo').textContent = `✅ Chamada — ${turma?.nome} · ${new Date(data+'T12:00').toLocaleDateString('pt-BR')} · ${horario}`;
+
+  document.getElementById('lista-freq').innerHTML = freq.frequencias.map(f => `
+    <div class="freq-item" id="freq-${f.crianca_id}">
+      <div class="nome-crianca">${f.crianca_nome}</div>
+      <button class="toggle-presente" id="tog-${f.crianca_id}"
+        onclick="togglePresenca(${f.crianca_id})"></button>
+    </div>`).join('');
+
+  atualizarContador();
+  document.getElementById('card-frequencia').style.display = 'block';
+}
+
+function togglePresenca(criancaId) {
+  const tog = document.getElementById(`tog-${criancaId}`);
+  const item = document.getElementById(`freq-${criancaId}`);
+  const on = tog.classList.toggle('on');
+  item.classList.toggle('presente', on);
+  atualizarContador();
+}
+
+function atualizarContador() {
+  const total = document.querySelectorAll('.toggle-presente').length;
+  const presentes = document.querySelectorAll('.toggle-presente.on').length;
+  document.getElementById('freq-contador').textContent = `${presentes} de ${total} presentes`;
+}
+
+async function salvarFrequencia() {
+  if (!aulaAtualId) return;
+  const dados = [];
+  document.querySelectorAll('.freq-item').forEach(item => {
+    const id = parseInt(item.id.replace('freq-', ''));
+    const presente = document.getElementById(`tog-${id}`).classList.contains('on');
+    dados.push({ crianca_id: id, presente });
+  });
+  await fetch(`/api/aulas/${aulaAtualId}/frequencia`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dados)
+  });
+  alert('✅ Frequência salva com sucesso!');
+}
+
+async function carregarPlanos() {
+  const planos = await (await fetch('/api/planos')).json();
+  if (!planos.length) {
+    document.getElementById('lista-planos').innerHTML = '<div class="msg-vazio">Nenhum plano enviado ainda.</div>';
+    return;
+  }
+  const badgeMap = { enviado: 'badge-enviado', aprovado: 'badge-aprovado', revisao: 'badge-revisao' };
+  const labelMap = { enviado: '⏳ Aguardando', aprovado: '✅ Aprovado', revisao: '⚠️ Revisão' };
+  document.getElementById('lista-planos').innerHTML = planos.map(p => `
+    <div class="plano-item">
+      <div class="plano-info">
+        <div class="plano-tema">${p.tema}</div>
+        <div class="plano-meta">${p.turma.nome} · ${new Date(p.data_aula+'T12:00').toLocaleDateString('pt-BR')} · ${p.eixo}</div>
+        ${p.feedback_coord ? `<div class="plano-feedback">💬 ${p.feedback_coord}</div>` : ''}
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+        <span class="badge ${badgeMap[p.status]}">${labelMap[p.status]}</span>
+        ${!p.resumo_pos_aula ? `<button class="btn btn-outline btn-sm" onclick="abrirResumo(${p.id})">Resumo</button>` : '<span style="font-size:0.75rem;color:var(--cinza)">✍️ Resumido</span>'}
+      </div>
+    </div>`).join('');
+}
+
+async function enviarPlano() {
+  const dados = {
+    turma_id: parseInt(document.getElementById('plano-turma').value),
+    data_aula: document.getElementById('plano-data').value,
+    eixo: document.getElementById('plano-eixo').value,
+    tema: document.getElementById('plano-tema').value,
+    objetivos: document.getElementById('plano-objetivos').value,
+    metodologia: document.getElementById('plano-metodologia').value,
+    materiais: document.getElementById('plano-materiais').value,
+  };
+  if (!dados.tema || !dados.objetivos) { alert('Preencha tema e objetivos.'); return; }
+  await fetch('/api/planos', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(dados) });
+  alert('📤 Plano enviado!');
+  carregarPlanos();
+}
+
+function abrirResumo(planoId) {
+  document.getElementById('resumo-plano-id').value = planoId;
+  document.getElementById('resumo-texto').value = '';
+  document.getElementById('modal-resumo').style.display = 'flex';
+}
+
+async function salvarResumo() {
+  const id = document.getElementById('resumo-plano-id').value;
+  const texto = document.getElementById('resumo-texto').value;
+  await fetch(`/api/planos/${id}`, {
+    method: 'PUT', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ resumo_pos_aula: texto })
+  });
+  document.getElementById('modal-resumo').style.display = 'none';
+  carregarPlanos();
+}
+
+async function carregarMinhaOferta() {
+  const mes = document.getElementById('oferta-mes').value;
+  const ano = document.getElementById('oferta-ano').value;
+  if (!meuId) return;
+  const data = await (await fetch(`/api/oferta/${meuId}?mes=${mes}&ano=${ano}`)).json();
+  const cont = document.getElementById('minha-oferta-conteudo');
+  cont.innerHTML = `
+    <div class="oferta-destaque">
+      <div class="mes">${MESES[parseInt(mes)]} ${ano}</div>
+      <div class="valor">R$ ${data.valor_total.toFixed(2).replace('.',',')}</div>
+      <div class="mes">${data.total_aulas} aula(s) no período</div>
+    </div>
+    <div class="card">
+      <div class="card-titulo">📊 Detalhamento</div>
+      ${data.detalhes.length ? `
+      <table>
+        <thead><tr><th>Data</th><th>Turma</th><th>Horário</th><th>Presentes</th><th>Valor Bruto</th><th>Você recebe</th></tr></thead>
+        <tbody>${data.detalhes.map(d => `
+          <tr>
+            <td>${new Date(d.data+'T12:00').toLocaleDateString('pt-BR')}</td>
+            <td>${d.turma}</td>
+            <td>${d.horario}</td>
+            <td>${d.presentes}</td>
+            <td>R$ ${d.valor_bruto_aula.toFixed(2).replace('.',',')}</td>
+            <td><strong>R$ ${d.valor_recebido.toFixed(2).replace('.',',')}</strong>${d.titular_faltou ? ' <span style="color:#dc2626;font-size:0.75rem">(substituto)</span>' : ''}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>` : '<div class="msg-vazio">Nenhuma aula no período.</div>'}
+    </div>`;
+}
+
+async function carregarAvisos() {
+  const avisos = await (await fetch('/api/avisos')).json();
+  if (!avisos.length) {
+    document.getElementById('lista-avisos-prof').innerHTML = '<div class="msg-vazio">Nenhum aviso.</div>';
+    return;
+  }
+  document.getElementById('lista-avisos-prof').innerHTML = avisos.map(a => `
+    <div class="aviso-item ${a.urgente ? 'urgente' : ''}">
+      <div class="aviso-titulo">${a.urgente ? '🚨 ' : '📢 '}${a.titulo}</div>
+      <div>${a.mensagem}</div>
+      <div class="aviso-data">${new Date(a.criado_em).toLocaleDateString('pt-BR')} · De: ${a.autor.nome}</div>
+    </div>`).join('');
+}
+
+function abrirTab(nome) {
+  document.querySelectorAll('.secao').forEach(s => s.classList.remove('ativo'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('ativo'));
+  document.getElementById(`tab-${nome}`).classList.add('ativo');
+  event.target.classList.add('ativo');
+}
+
+async function sair() {
+  await fetch('/api/auth/logout', { method: 'POST' });
+  window.location.href = '/login';
+}
+
+init();
+</script>
+</body>
+</html>
