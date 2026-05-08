@@ -106,3 +106,19 @@ O sistema sinaliza as crianças elegíveis no painel da coordenadora.
 | Turma 3 | 7–8 anos |
 | Turma 4 | 9–16 anos |
 # AvaMicroservice
+
+
+# Mudanças 
+
+## coordenador/admin:
+
+1. Corrigir a promoção das crianças
+2. Turmas: Não consegue editar uma turma já existente
+3. Criança: Não é necessário ter "turma", o sistema deve alocar a criança automaticamente pela idade
+4. O professor não pode ter acesso se ele teve substituto ou não, isso é papel do coordenador
+
+
+## professores
+
+1. Frequência: Os professores so podem ter acesso a sua turma, ele não pode ter acesso as outras turmas
+2. O professor não precisa necessariamente adicionar um anexo, ele pode somente descrever a aula
